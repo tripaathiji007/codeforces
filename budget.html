@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Management</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #e5e9ec;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        #balance {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #transaction-history {
+            margin-top: 30px;
+        }
+
+        #summary {
+            margin-top: 30px;
+        }
+
+        .ideas-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="text-center">Budget Management</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="income">Income:</label>
+                                <input type="number" id="income" class="form-control" placeholder="Enter income">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="expenses">Expenses:</label>
+                                <input type="number" id="expenses" class="form-control" placeholder="Enter expenses">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" onclick="calculateBalance()">Calculate</button>
+
+                    <div id="balance" class="text-center mt-3">Balance: $0.00</div>
+
+                    <!-- Chart Canvas -->
+                    <canvas id="budgetChart" width="400" height="200" class="mt-4"></canvas>
+
+                    <!-- Transaction History -->
+                    <div id="transaction-history" class="mt-4">
+                        <h4>Transaction History</h4>
+                        <ul id="transaction-list" class="list-group">
+                            <!-- Transaction items will be added dynamically here -->
+                        </ul>
+                    </div>
+
+                    <!-- Summary -->
+                    <div id="summary" class="mt-4">
+                        <h4>Summary</h4>
+                        <p>Total Income: $<span id="total-income">0.00</span></p>
+                        <p>Total Expenses: $<span id="total-expenses">0.00</span></p>
+                    </div>
+
+                    <!-- Button for Investment Ideas -->
+                    <a href="investment_idea.html" class="btn btn-success btn-block ideas-button">Investment Ideas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    var transactions = [];
+
+    function calculateBalance() {
+        var income = parseFloat(document.getElementById('income').value) || 0;
+        var expenses = parseFloat(document.getElementById('expenses').value) || 0;
+        var balance = income - expenses;
+
+        document.getElementById('balance').innerText = 'Balance: $' + balance.toFixed(2);
+
+        // Update chart data
+        updateChart(income, expenses);
+
+        // Update transaction history
+        updateTransactionHistory(income, expenses);
+
+        // Update summary
+        updateSummary();
+    }
+
+    function updateChart(income, expenses) {
+        var ctx = document.getElementById('budgetChart').getContext('2d');
+        var data = {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                label: 'Budget Overview',
+                data: [income, expenses],
+                backgroundColor: ['#28a745', '#dc3545'],
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        };
+
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    }
+
+    function updateTransactionHistory(income, expenses) {
+        var transactionList = document.getElementById('transaction-list');
+        var transactionItem = document.createElement('li');
+        transactionItem.classList.add('list-group-item');
+        transactionItem.innerHTML = `<strong>Income:</strong> $${income.toFixed(2)} | <strong>Expenses:</strong> $${expenses.toFixed(2)}`;
+        transactions.push(transactionItem.outerHTML);
+        transactionList.innerHTML = transactions.join('');
+    }
+
+    function updateSummary() {
+        var totalIncome = transactions.reduce(function (acc, transaction) {
+            var incomeMatch = transaction.match(/<strong>Income:<\/strong> \$([0-9.]+)/);
+            return acc + (incomeMatch ? parseFloat(incomeMatch[1]) : 0);
+        }, 0);
+
+        var totalExpenses = transactions.reduce(function (acc, transaction) {
+            var expensesMatch = transaction.match(/<strong>Expenses:<\/strong> \$([0-9.]+)/);
+            return acc + (expensesMatch ? parseFloat(expensesMatch[1]) : 0);
+        }, 0);
+
+        document.getElementById('total-income').innerText = totalIncome.toFixed(2);
+        document.getElementById('total-expenses').innerText = totalExpenses.toFixed(2);
+    }
+</script>
+
+</body>
+</html>

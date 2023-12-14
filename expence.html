@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigMoney</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        #header {
+            background-color: #333;
+            color: white;
+            text-align: left;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #header #logo img {
+            width: 32px;
+            height: 31px;
+            margin: 14px 22px;
+            padding: 0px 1px;
+        }
+
+        #nav {
+            border-radius: 15px;
+            background-color: #333;
+            overflow: hidden;
+            float: left;
+        }
+
+        #nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        #nav a:hover {
+            background-color: #555;
+        }
+
+        #logo {
+            float: right;
+            padding: 10px;
+            transition: transform 0.3s;
+        }
+
+        #logo:hover {
+            transform: scale(1.1);
+        }
+
+        #tracker-container {
+            display: flex;
+            max-width: 1421px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #expenses-section {
+            width: 60%;
+            margin-right: 20px;
+        }
+
+        #chart-section {
+            width: 40%;
+        }
+
+        label {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 12px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .remove-button {
+            cursor: pointer;
+            color: red;
+            border: none;
+            background: none;
+            transition: color 0.3s;
+        }
+
+        .remove-button:hover {
+            color: darkred;
+        }
+
+        #total-expenses {
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        #expensesChart {
+            height: 300px;
+            border-radius: 8px;
+        }
+
+        .bar-percentage {
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div id="header">
+            <h1>Expenses Tracker</h1>
+            <div id="nav">
+                <a href="#">Dashboard</a>
+                <a href="#">Expenses</a>
+                <a href="#">Reports</a>
+                <a href="#">Policy</a>
+                <a href="#">Settings</a>
+            </div>
+            <div id="logo"><img src="icons8-user-48.png" alt="logo"></div>
+        </div>
+    </header>
+    <main>
+        <div id="tracker-container">
+            <div id="expenses-section">
+                <form action="" id="expenseForm" onsubmit="return false;">
+                    <label for="expense">Enter Expense:</label>
+                    <input type="text" id="expense" placeholder="Expense description">
+                    <label for="amount">Amount:</label>
+                    <input type="text" id="amount" placeholder="Expense amount">
+                    <button onclick="addExpense()">Add Expense</button>
+                </form>
+                <h2>Expenses:</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenses-list"></tbody>
+                </table>
+
+                <h3 id="total-expenses">Total Expenses: $<span>0.00</span></h3>
+                <button onclick="showHighestPercentage()" style="padding: 10px; font-size: 1rem; margin-top: 10px;">Show
+                    Highest Percentage</button>
+            </div>
+            <div id="chart-section">
+                <canvas id="expensesChart"></canvas>
+            </div>
+        </div>
+    </main>
+    <script>
+        let expenses = [];
+
+        function addExpense() {
+            const expenseDescription = document.getElementById('expense').value;
+            const expenseAmount = parseFloat(document.getElementById('amount').value);
+
+            if (expenseDescription && !isNaN(expenseAmount)) {
+                expenses.push({ description: expenseDescription, amount: expenseAmount });
+                updateExpensesList();
+                updateTotalExpenses();
+                updateChart();
+            }
+
+            // Clear input fields
+            document.getElementById('expenseForm').reset();
+
+            return false;
+        }
+
+        function removeExpense(index) {
+            expenses.splice(index, 1);
+            updateExpensesList();
+            updateTotalExpenses();
+            updateChart();
+        }
+
+        function updateExpensesList() {
+            const expensesList = document.getElementById('expenses-list');
+            expensesList.innerHTML = '';
+
+            expenses.forEach((expense, index) => {
+                const row = expensesList.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+
+                cell1.textContent = expense.description;
+                cell2.textContent = `$${expense.amount.toFixed(2)}`;
+                cell3.innerHTML = `<button class="remove-button" onclick="removeExpense(${index})">Remove</button>`;
+            });
+        }
+        function updateTotalExpenses() {
+            const totalExpensesElement = document.getElementById('total-expenses').querySelector('span');
+            const totalExpenses = expenses.reduce((total, expense) => total + expense.amount, 0);
+            totalExpensesElement.textContent = totalExpenses.toFixed(2);
+        }
+
+        function showHighestPercentage() {
+            const highestExpense = expenses.reduce((max, expense) => (expense.amount > max.amount) ? expense : max, { amount: 0 });
+            const highestPercentage = (highestExpense.amount / expenses.reduce((total, expense) => total + expense.amount, 0)) * 100;
+
+            const chartData = {
+                labels: expenses.map(expense => expense.description),
+                datasets: [{
+                    label: 'Expenses',
+                    data: expenses.map(expense => expense.amount),
+                    backgroundColor: expenses.map(expense => (expense === highestExpense) ? 'rgba(255, 0, 0, 0.6)' : 'rgba(75, 192, 192, 0.2)'),
+                    borderColor: expenses.map(expense => (expense === highestExpense) ? 'rgba(255, 0, 0, 1)' : 'rgba(75, 192, 192, 1)'),
+                    borderWidth: 1
+                }]
+            };
+
+            // Create a canvas element for the chart
+            const canvas = document.createElement('canvas');
+            canvas.id = 'expensesChart';
+
+            // Set the canvas size
+            canvas.width = 400;
+            canvas.height = 300;
+
+            // Remove existing canvas if any
+            const existingCanvas = document.getElementById('expensesChart');
+            if (existingCanvas) {
+                existingCanvas.remove();
+            }
+
+            // Append the canvas to the tracker container
+            document.getElementById('chart-section').appendChild(canvas);
+
+            // Create a chart using Chart.js library
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

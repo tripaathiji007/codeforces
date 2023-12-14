@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylish Account Information</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        h2 {
+            text-align: center;
+            color: rgb(18, 102, 96);
+            transition: color 0.5s ease-in-out;
+        }
+
+        form {
+            margin-top: 20px;
+            transition: transform 0.3s ease-in-out, box-shadow 0.5s ease-in-out;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            color: #354d45;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 14px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            color: #ffffff;
+            background-color: #427c2c;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: rgb(7,54,51);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Enter Account Information</h2>
+
+
+    <form id="accountForm" >
+        <div class="form-group">
+            <label for="accountHolderName">Account Holder Name:</label>
+            <input type="text" id="accountHolderName" name="accountHolderName" class="form-control" required>
+            <div class="invalid-feedback">Please enter the account holder's name.</div>
+        </div>
+
+        <div class="form-group">
+            <label for="accountNumber">Account Number:</label>
+            <input type="text" id="accountNumber" name="accountNumber" class="form-control" required>
+            <div class="invalid-feedback">Please enter a valid account number.</div>
+        </div>
+
+        <div class="form-group">
+            <label for="ifscCode">IFSC Code:</label>
+            <input type="text" id="ifscCode" name="ifscCode" class="form-control" required>
+            <div class="invalid-feedback">Please enter a valid IFSC code.</div>
+        </div>
+
+        <button type="button" onclick="saveInformation()" class="btn btn-primary">Save Information</button>
+    </form>
+</div>
+<!-- ... your HTML code ... -->
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuMI5WVCQbUssbnWEsrkGaAg2D3zCPmCk",
+      authDomain: "aman-5bf55.firebaseapp.com",
+      projectId: "aman-5bf55",
+      storageBucket: "aman-5bf55.appspot.com",
+      messagingSenderId: "700270165325",
+      appId: "1:700270165325:web:273241d53520ca475e8b04"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const ACno = document.getElementById('accountHolderName');
+    const IFC = document.getElementById('accountNumber');  // Corrected variable name
+    const ACF = document.getElementById('accountForm');  // Corrected variable name
+
+    const registerUser = evt => {
+      evt.preventDefault();
+      createUserPassword(auth, ACno.value, IFC.value)  // Corrected variable names
+        .then((credentials) => {
+          console.log("User registered:", credentials);
+        })
+        .catch((error) => {
+          alert(error.message);
+          console.log(error);
+        });
+    };
+
+    ACF.addEventListener('submit', registerUser);  // Corrected event listener
+
+</script>
+
+<script>
+    function saveInformation() {
+        var form = document.getElementById('accountForm');
+
+        if (form.checkValidity()) {
+            var accountHolderName = document.getElementById('accountHolderName').value;
+            var accountNumber = document.getElementById('accountNumber').value;
+            var ifscCode = document.getElementById('ifscCode').value;  // Corrected ID
+
+            // Log the values to the console
+            console.log('Account Holder Name:', accountHolderName);
+            console.log('Account Number:', accountNumber);
+            console.log('IFSCCode:', ifscCode);
+
+            // Add animations and decorations
+            document.body.style.backgroundColor = '#28a745';
+            setTimeout(function () {
+                document.body.style.backgroundColor = '#f0f0f0';
+            }, 1000);
+
+            document.querySelector('.container').style.backgroundColor = '#ffffff';
+            setTimeout(function () {
+                document.querySelector('.container').style.backgroundColor = '#ffffff';
+            }, 1000);
+
+            document.querySelector('h2').style.color = '#ffffff';
+            setTimeout(function () {
+                document.querySelector('h2').style.color = '#007bff';
+            }, 1000);
+
+            form.style.transform = 'scale(1.05)';
+            form.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.2)';
+            setTimeout(function () {
+                form.style.transform = 'scale(1)';
+                form.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.1)';
+            }, 1000);
+        } else {
+            // If the form is not valid, trigger Bootstrap's native validation styles
+            form.classList.add('was-validated');
+        }
+    }
+</script>
+
+<!-- Bootstrap JS and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>
